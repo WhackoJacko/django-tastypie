@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from __future__ import with_statement
-from copy import deepcopy
+from copy import copy
 import logging
 import warnings
 
@@ -176,12 +176,14 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
     data sources, such as search results, files, other data, etc.
     """
     def __init__(self, api_name=None):
-        self.fields = deepcopy(self.base_fields)
+        self.fields = {k: copy(v) for k, v in self.base_fields.items()}
 
         if not api_name is None:
             self._meta.api_name = api_name
 
     def __getattr__(self, name):
+        if name == '__setstate__':
+            raise AttributeError(name)
         if name in self.fields:
             return self.fields[name]
         raise AttributeError(name)
